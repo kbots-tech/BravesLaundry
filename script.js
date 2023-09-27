@@ -154,9 +154,21 @@ function fetchAndDisplayMachines(locationId, locationName) {
 }
 
 // Loop through each Location ID and fetch data
-for (const locationId in roomToLocationMap) {
-    if (roomToLocationMap.hasOwnProperty(locationId)) {
-        const locationName = getLocationName(locationId);
-        fetchAndDisplayMachines(locationId, locationName);
+function refreshLaundry(search) {
+    for (const locationId in roomToLocationMap) {
+        if (roomToLocationMap.hasOwnProperty(locationId)) {
+            const locationName = getLocationName(locationId);
+            if (search.trim()) {
+                if (!locationName.toLowerCase().includes(search.toLowerCase())) continue;
+            }
+            fetchAndDisplayMachines(locationId, locationName);
+        }
     }
 }
+
+document.getElementById('search-button').onclick = () => {
+    document.getElementById('machine-container').replaceChildren();
+    refreshLaundry(document.getElementById('search-bar').value);
+}
+
+refreshLaundry("");
