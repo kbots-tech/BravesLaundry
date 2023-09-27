@@ -1,0 +1,143 @@
+/* Reset some default styles for consistency */
+body, h1, h2, p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Apply some basic styling to the entire page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Style for large location card */
+.large-card {
+    background-color: #fff;
+    padding: 20px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+/* Style for Location Name header */
+.large-card h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #c8102e; /* Bradley University Red */
+}
+
+/* Style for small machine card */
+.small-card {
+    background-color: #fff;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(25% - 20px); /* Calculate width with margins */
+    min-width: 200px;
+}
+
+/* Style for paragraphs inside machine cards */
+.small-card p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+    .large-card {
+        width: 100%;
+    }
+
+    .small-card {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+
+/* Style for the container of small machine cards */
+.machines-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow cards to wrap to the next line */
+    justify-content: 5%; /* Distribute cards evenly */
+}
+
+/* Style for small machine card */
+.small-card {
+    background-color: #fff;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(25% - 20px); /* Calculate width with margins */
+    min-width: 200px;
+}
+
+/* Style for the header */
+.header {
+    background-color: #c8102e; /* Bradley University Red */
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* Style for the dropdown button */
+#dropdown-button {
+    background-color: #c8102e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#dropdown-button:hover {
+    background-color: #a80e27; /* Hover color (can be adjusted) */
+}
+
+/* Style for the dropdown content */
+.dropdown-content {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    background-color: #c8102e; /* Bradley University Red */
+    min-width: 200px;
+    z-index: 1;
+}
+
+.dropdown-content li {
+    padding: 10px;
+    text-align: center;
+}
+
+.dropdown-content li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    display: block;
+    transition: background-color 0.3s;
+}
+
+.dropdown-content li a:hover {
+    background-color: #a80e27; /* Hover color (can be adjusted) */
+}
+
+
+.green-background {
+    background-color: rgba(0, 128, 0, 0.5);
+}
+
+.red-background {
+    background-color: rgba(128, 0, 0, 0.5);
+}
