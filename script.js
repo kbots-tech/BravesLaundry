@@ -97,54 +97,88 @@ function fetchAndDisplayMachines(locationId, locationName) {
     const locationCard = document.createElement('div');
     locationCard.classList.add('large-card');
     
-    // Location Name
-    const locationTitle = document.createElement('h2');
-    locationTitle.textContent = locationName;
-    locationCard.id =  locationName.replace(/ /g, '-').toLowerCase();
-    locationCard.appendChild(locationTitle);
-    
     // Small cards for machines within the location
     const machinesContainer = document.createElement('div');
     machinesContainer.classList.add('machines-container');
-
-    const machineCards = [];
 
     // Fetch JSON data for the location
     fetch(`${baseAPIURL}${locationId}/machines`)
     .then(response => response.json())
     .then(data => {
-        data.forEach(machine => {
+        data.sort((m1, m2) => {
+            if (m1.stickerNumber > m2.stickerNumber) {
+                return 1;
+            } else if (m1.stickerNumber < m2.stickerNumber) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }).forEach(machine => {
             const machineCard = document.createElement('div');
             machineCard.classList.add('small-card');
 
-            const dot = document.createElement('span');
-            if (machine.available) {
-                dot.classList.add('green-dot');
-            } else {
-                dot.classList.add('red-dot');
-            }
+            const cardContainer = document.createElement('div');
+            cardContainer.classList.add('card-container');
+
+            const stickerNumber = document.createElement('p');
+            stickerNumber.classList.add('sticker-number');
+            stickerNumber.textContent = `#${machine.stickerNumber}`
+
+            cardContainer.appendChild(stickerNumber);
 
             // Create and populate paragraphs for machine data
             const type = document.createElement('p');
-            machineCard.appendChild(dot);
-            type.textContent = `${machine.type.charAt(0).toUpperCase() + machine.type.slice(1)} [${machine.stickerNumber}]`;
+            type.textContent = `${machine.type.charAt(0).toUpperCase() + machine.type.slice(1)}`;
             type.classList.add('machine-type');
-            machineCard.appendChild(type);
-
+            cardContainer.appendChild(type);
 
             const timeRemaining = document.createElement('p');
-            timeRemaining.textContent = `Time Remaining: ${machine.timeRemaining} minutes`;
-            machineCard.appendChild(timeRemaining);
+            timeRemaining.textContent = `${machine.timeRemaining} minutes left`;
+            cardContainer.appendChild(timeRemaining);
+
+            const progressBar = document.createElement('div');
+            progressBar.id = 'progress-bar';
+
+            const bar = document.createElement('div');
+            bar.id = 'bar';
+
+            if (!machine.available) {
+                const dryerTime = 45;
+                const washerTime = 31;
+                let completed, percentage;
+                if (machine.type === 'dryer') {
+                    completed = dryerTime - machine.timeRemaining;
+                    percentage = completed / dryerTime;
+                } else if (machine.type === 'washer') {
+                    completed = washerTime - machine.timeRemaining;
+                    percentage = completed / washerTime;
+                }
+                bar.style.width = (percentage * 100) + "%";
+            } else {
+                bar.style.width = "100%";
+                bar.style.backgroundColor = "#008000";
+            }
+
+            progressBar.appendChild(bar);
+            machineCard.appendChild(cardContainer);
+            machineCard.appendChild(progressBar);
 
             // Check the availability and set the background color accordingly
 
-            machineCards.push(machineCard);
             machinesContainer.appendChild(machineCard);
         });
     })
     .catch(error => {
         console.error(`Error fetching data for location ${locationId}:`, error);
     });
+
+    // console.log(machineCards);
+
+    // Location Name
+    const locationTitle = document.createElement('h2');
+    locationTitle.textContent = `${locationName}`;
+    locationCard.id =  locationName.replace(/ /g, '-').toLowerCase();
+    locationCard.appendChild(locationTitle);
 
     locationCard.appendChild(machinesContainer);
     locationContainer.appendChild(locationCard);
