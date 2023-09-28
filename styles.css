@@ -1,5 +1,5 @@
 /* Reset some default styles for consistency */
-body, h1, h2, p {
+* {
     margin: 0;
     padding: 0;
 }
@@ -75,8 +75,11 @@ body {
     margin: 10px;
     border: 1px solid #ccc;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: calc(25% - 20px); /* Calculate width with margins */
+    width: calc(30% - 20px); /* Calculate width with margins */
     min-width: 200px;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 /* Style for the header */
@@ -85,6 +88,10 @@ body {
     color: white;
     padding: 10px;
     text-align: center;
+    margin: 0;
+    width: 100%;
+    display: flex;
+
 }
 
 /* Style for the dropdown button */
@@ -148,4 +155,34 @@ body {
 
 .red-background {
     background-color: rgba(128, 0, 0, 0.5);
+}
+
+.green-dot {
+    height: 10px;
+    width: 10px;
+    background-color: rgba(0, 128, 0, 1);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+
+.red-dot {
+    height: 10px;
+    width: 10px;
+    background-color: rgba(128, 0, 0, 1);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot {
+    height: 25px;
+    width: 25px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.machine-type {
+    font-weight: bold;
 }

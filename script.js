@@ -59,30 +59,28 @@ const roomToLocationMap = {
 };
 
 // Create dropdown menu based on roomToLocationMap
-const dropdownButton = document.getElementById('dropdown-button');
+const dropdownSelector = document.getElementById('dropdown-button');
 const dropdownContent = document.getElementById('dropdown-content');
+
+const empty = document.createElement('option');
+empty.textContent = "All Locations";
+empty.value = "";
+dropdownSelector.appendChild(empty);
 
 for (const roomId in roomToLocationMap) {
     const locationName = roomToLocationMap[roomId];
-    const locationId = locationName.replace(/ /g, '-').toLowerCase();
+    // const locationId = locationName.replace(/ /g, '-').toLowerCase();
 
-    const listItem = document.createElement('li');
-    const link = document.createElement('a');
-    link.textContent = locationName;
-    link.href = `#${locationId}`;
-
-    listItem.appendChild(link);
-    dropdownContent.appendChild(listItem);
+    const listItem = document.createElement('option');
+    listItem.textContent = locationName;
+    listItem.value = roomId;
+    dropdownSelector.appendChild(listItem);
 }
 
-// Toggle dropdown menu
-dropdownButton.addEventListener('click', () => {
-    if (dropdownContent.style.display === 'block') {
-        dropdownContent.style.display = 'none';
-    } else {
-        dropdownContent.style.display = 'block';
-    }
-});
+dropdownSelector.onchange = (event) => {
+    console.log(event.target.value);
+    refreshLaundry(event.target.value);
+};
 
 
 // Function to get the Location Name based on Location ID
@@ -109,6 +107,8 @@ function fetchAndDisplayMachines(locationId, locationName) {
     const machinesContainer = document.createElement('div');
     machinesContainer.classList.add('machines-container');
 
+    const machineCards = [];
+
     // Fetch JSON data for the location
     fetch(`${baseAPIURL}${locationId}/machines`)
     .then(response => response.json())
@@ -117,30 +117,28 @@ function fetchAndDisplayMachines(locationId, locationName) {
             const machineCard = document.createElement('div');
             machineCard.classList.add('small-card');
 
+            const dot = document.createElement('span');
+            if (machine.available) {
+                dot.classList.add('green-dot');
+            } else {
+                dot.classList.add('red-dot');
+            }
+
             // Create and populate paragraphs for machine data
             const type = document.createElement('p');
-            type.textContent = `Type: ${machine.type}`;
+            machineCard.appendChild(dot);
+            type.textContent = `${machine.type.charAt(0).toUpperCase() + machine.type.slice(1)} [${machine.stickerNumber}]`;
+            type.classList.add('machine-type');
             machineCard.appendChild(type);
 
-            const status = document.createElement('p');
-            status.textContent = `Status: ${machine.mode}`;
-            machineCard.appendChild(status);
-
-            const availability = document.createElement('p');
-            availability.textContent = `Ready: ${machine.available}`;
-            machineCard.appendChild(availability);
 
             const timeRemaining = document.createElement('p');
             timeRemaining.textContent = `Time Remaining: ${machine.timeRemaining} minutes`;
             machineCard.appendChild(timeRemaining);
 
             // Check the availability and set the background color accordingly
-            if (machine.available) {
-                machineCard.classList.add('green-background'); // Add a CSS class for green background
-            }else{
-                machineCard.classList.add('red-background'); // Add a CSS class for red background
-            }
 
+            machineCards.push(machineCard);
             machinesContainer.appendChild(machineCard);
         });
     })
@@ -155,11 +153,13 @@ function fetchAndDisplayMachines(locationId, locationName) {
 
 // Loop through each Location ID and fetch data
 function refreshLaundry(search) {
+    document.getElementById('machine-container').replaceChildren();
+
     for (const locationId in roomToLocationMap) {
         if (roomToLocationMap.hasOwnProperty(locationId)) {
             const locationName = getLocationName(locationId);
             if (search.trim()) {
-                if (!locationName.toLowerCase().includes(search.toLowerCase())) continue;
+                if (!locationName.toLowerCase().includes(search.toLowerCase()) && !locationId.includes(search)) continue;
             }
             fetchAndDisplayMachines(locationId, locationName);
         }
@@ -167,7 +167,6 @@ function refreshLaundry(search) {
 }
 
 document.getElementById('search-button').onclick = () => {
-    document.getElementById('machine-container').replaceChildren();
     refreshLaundry(document.getElementById('search-bar').value);
 }
 
