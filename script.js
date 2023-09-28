@@ -59,30 +59,28 @@ const roomToLocationMap = {
 };
 
 // Create dropdown menu based on roomToLocationMap
-const dropdownButton = document.getElementById('dropdown-button');
+const dropdownSelector = document.getElementById('dropdown-button');
 const dropdownContent = document.getElementById('dropdown-content');
+
+const empty = document.createElement('option');
+empty.textContent = "All Locations";
+empty.value = "";
+dropdownSelector.appendChild(empty);
 
 for (const roomId in roomToLocationMap) {
     const locationName = roomToLocationMap[roomId];
-    const locationId = locationName.replace(/ /g, '-').toLowerCase();
+    // const locationId = locationName.replace(/ /g, '-').toLowerCase();
 
-    const listItem = document.createElement('li');
-    const link = document.createElement('a');
-    link.textContent = locationName;
-    link.href = `#${locationId}`;
-
-    listItem.appendChild(link);
-    dropdownContent.appendChild(listItem);
+    const listItem = document.createElement('option');
+    listItem.textContent = locationName;
+    listItem.value = roomId;
+    dropdownSelector.appendChild(listItem);
 }
 
-// Toggle dropdown menu
-dropdownButton.addEventListener('click', () => {
-    if (dropdownContent.style.display === 'block') {
-        dropdownContent.style.display = 'none';
-    } else {
-        dropdownContent.style.display = 'block';
-    }
-});
+dropdownSelector.onchange = (event) => {
+    console.log(event.target.value);
+    refreshLaundry(event.target.value);
+};
 
 
 // Function to get the Location Name based on Location ID
@@ -99,12 +97,6 @@ function fetchAndDisplayMachines(locationId, locationName) {
     const locationCard = document.createElement('div');
     locationCard.classList.add('large-card');
     
-    // Location Name
-    const locationTitle = document.createElement('h2');
-    locationTitle.textContent = locationName;
-    locationCard.id =  locationName.replace(/ /g, '-').toLowerCase();
-    locationCard.appendChild(locationTitle);
-    
     // Small cards for machines within the location
     const machinesContainer = document.createElement('div');
     machinesContainer.classList.add('machines-container');
@@ -113,33 +105,65 @@ function fetchAndDisplayMachines(locationId, locationName) {
     fetch(`${baseAPIURL}${locationId}/machines`)
     .then(response => response.json())
     .then(data => {
-        data.forEach(machine => {
+        data.sort((m1, m2) => {
+            if (m1.stickerNumber > m2.stickerNumber) {
+                return 1;
+            } else if (m1.stickerNumber < m2.stickerNumber) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }).forEach(machine => {
             const machineCard = document.createElement('div');
             machineCard.classList.add('small-card');
 
+            const cardContainer = document.createElement('div');
+            cardContainer.classList.add('card-container');
+
+            const stickerNumber = document.createElement('p');
+            stickerNumber.classList.add('sticker-number');
+            stickerNumber.textContent = `#${machine.stickerNumber}`
+
+            cardContainer.appendChild(stickerNumber);
+
             // Create and populate paragraphs for machine data
             const type = document.createElement('p');
-            type.textContent = `Type: ${machine.type}`;
-            machineCard.appendChild(type);
-
-            const status = document.createElement('p');
-            status.textContent = `Status: ${machine.mode}`;
-            machineCard.appendChild(status);
-
-            const availability = document.createElement('p');
-            availability.textContent = `Ready: ${machine.available}`;
-            machineCard.appendChild(availability);
+            type.textContent = `${machine.type.charAt(0).toUpperCase() + machine.type.slice(1)}`;
+            type.classList.add('machine-type');
+            cardContainer.appendChild(type);
 
             const timeRemaining = document.createElement('p');
-            timeRemaining.textContent = `Time Remaining: ${machine.timeRemaining} minutes`;
-            machineCard.appendChild(timeRemaining);
+            timeRemaining.textContent = `${machine.timeRemaining} minutes left`;
+            cardContainer.appendChild(timeRemaining);
+
+            const progressBar = document.createElement('div');
+            progressBar.id = 'progress-bar';
+
+            const bar = document.createElement('div');
+            bar.id = 'bar';
+
+            if (!machine.available) {
+                const dryerTime = 45;
+                const washerTime = 31;
+                let completed, percentage;
+                if (machine.type === 'dryer') {
+                    completed = dryerTime - machine.timeRemaining;
+                    percentage = completed / dryerTime;
+                } else if (machine.type === 'washer') {
+                    completed = washerTime - machine.timeRemaining;
+                    percentage = completed / washerTime;
+                }
+                bar.style.width = (percentage * 100) + "%";
+            } else {
+                bar.style.width = "100%";
+                bar.style.backgroundColor = "#008000";
+            }
+
+            progressBar.appendChild(bar);
+            machineCard.appendChild(cardContainer);
+            machineCard.appendChild(progressBar);
 
             // Check the availability and set the background color accordingly
-            if (machine.available) {
-                machineCard.classList.add('green-background'); // Add a CSS class for green background
-            }else{
-                machineCard.classList.add('red-background'); // Add a CSS class for red background
-            }
 
             machinesContainer.appendChild(machineCard);
         });
@@ -148,6 +172,14 @@ function fetchAndDisplayMachines(locationId, locationName) {
         console.error(`Error fetching data for location ${locationId}:`, error);
     });
 
+    // console.log(machineCards);
+
+    // Location Name
+    const locationTitle = document.createElement('h2');
+    locationTitle.textContent = `${locationName}`;
+    locationCard.id =  locationName.replace(/ /g, '-').toLowerCase();
+    locationCard.appendChild(locationTitle);
+
     locationCard.appendChild(machinesContainer);
     locationContainer.appendChild(locationCard);
     document.getElementById('machine-container').appendChild(locationContainer);
@@ -155,11 +187,13 @@ function fetchAndDisplayMachines(locationId, locationName) {
 
 // Loop through each Location ID and fetch data
 function refreshLaundry(search) {
+    document.getElementById('machine-container').replaceChildren();
+
     for (const locationId in roomToLocationMap) {
         if (roomToLocationMap.hasOwnProperty(locationId)) {
             const locationName = getLocationName(locationId);
             if (search.trim()) {
-                if (!locationName.toLowerCase().includes(search.toLowerCase())) continue;
+                if (!locationName.toLowerCase().includes(search.toLowerCase()) && !locationId.includes(search)) continue;
             }
             fetchAndDisplayMachines(locationId, locationName);
         }
@@ -167,7 +201,6 @@ function refreshLaundry(search) {
 }
 
 document.getElementById('search-button').onclick = () => {
-    document.getElementById('machine-container').replaceChildren();
     refreshLaundry(document.getElementById('search-bar').value);
 }
 
